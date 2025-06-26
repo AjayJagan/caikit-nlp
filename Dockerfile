@@ -1,8 +1,8 @@
-FROM registry.access.redhat.com/ubi9/ubi-minimal:latest as base
+FROM registry.access.redhat.com/ubi9/ubi:latest as base
 
 RUN microdnf update -y && \
     microdnf install -y \
-        git python-pip && \
+        git python3-pip && \
     pip install --upgrade --no-cache-dir pip wheel && \
     microdnf clean all
 
@@ -23,12 +23,12 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 FROM base as deploy
 
-RUN python -m venv --upgrade-deps /opt/caikit/
+RUN python3 -m venv --upgrade-deps /opt/caikit/
 
 ENV VIRTUAL_ENV=/opt/caikit
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-# Install build dependencies for gRPC compilation
+# Install comprehensive build dependencies for scientific computing
 RUN microdnf update -y && \
     microdnf install -y \
         gcc gcc-c++ gcc-gfortran make cmake \
@@ -36,7 +36,9 @@ RUN microdnf update -y && \
         openssl-devel \
         zlib-devel \
         lapack-devel \
-        blas-devel && \
+        blas-devel \
+        atlas-devel \
+        pkgconfig && \
     microdnf clean all
 
 COPY --from=builder /build/dist/caikit_nlp*.whl /tmp/
