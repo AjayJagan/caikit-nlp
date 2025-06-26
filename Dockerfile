@@ -1,8 +1,8 @@
-FROM registry.access.redhat.com/ubi9/ubi:latest as base
+FROM registry.access.redhat.com/ubi9/ubi-minimal:latest as base
 
 RUN microdnf update -y && \
     microdnf install -y \
-        git python3-pip && \
+        git python-pip && \
     pip install --upgrade --no-cache-dir pip wheel && \
     microdnf clean all
 
@@ -15,34 +15,24 @@ COPY pyproject.toml .
 COPY tox.ini .
 COPY caikit_nlp caikit_nlp
 # .git is required for setuptools-scm get the version
-RUN --mount=source=.git,target=.git,type=bind \
-    --mount=type=cache,target=/root/.cache/pip \
+COPY .git .git
+RUN --mount=type=cache,target=/root/.cache/pip \
      tox -e build
 
 
 FROM base as deploy
 
-RUN python3 -m venv --upgrade-deps /opt/caikit/
+RUN python -m venv --upgrade-deps /opt/caikit/
 
 ENV VIRTUAL_ENV=/opt/caikit
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-# Install essential build dependencies
-RUN microdnf update -y && \
-    microdnf install -y \
-        gcc gcc-c++ gcc-gfortran make cmake \
-        python3-devel \
-        openssl-devel \
-        zlib-devel \
-        pkgconfig && \
-    microdnf clean all
+# Install build tools for pip packages that require compilation
+RUN microdnf install -y gcc gcc-c++ python3-devel && microdnf clean all
 
 COPY --from=builder /build/dist/caikit_nlp*.whl /tmp/
 RUN --mount=type=cache,target=/root/.cache/pip \
-    # Install pre-compiled scientific packages first
-    pip install --prefer-binary --no-deps numpy scipy scikit-learn && \
-    # Then install the main package
-    pip install --prefer-binary /tmp/caikit_nlp*.whl && \
+    pip install /tmp/caikit_nlp*.whl && \
     rm /tmp/caikit_nlp*.whl
 
 COPY LICENSE /opt/caikit/
