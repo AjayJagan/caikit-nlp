@@ -31,10 +31,12 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 # Install build dependencies for gRPC compilation
 RUN microdnf update -y && \
     microdnf install -y \
-        gcc gcc-c++ make cmake \
+        gcc gcc-c++ gcc-gfortran make cmake \
         python3-devel \
         openssl-devel \
-        zlib-devel && \
+        zlib-devel \
+        lapack-devel \
+        blas-devel && \
     microdnf clean all
 
 COPY --from=builder /build/dist/caikit_nlp*.whl /tmp/
