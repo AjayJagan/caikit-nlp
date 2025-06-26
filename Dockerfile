@@ -27,16 +27,13 @@ RUN python3 -m venv --upgrade-deps /opt/caikit/
 ENV VIRTUAL_ENV=/opt/caikit
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-# Install comprehensive build dependencies for scientific computing
+# Install essential build dependencies
 RUN microdnf update -y && \
     microdnf install -y \
         gcc gcc-c++ gcc-gfortran make cmake \
         python3-devel \
         openssl-devel \
         zlib-devel \
-        lapack-devel \
-        blas-devel \
-        atlas-devel \
         pkgconfig && \
     microdnf clean all
 
