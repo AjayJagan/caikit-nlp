@@ -27,6 +27,15 @@ RUN python -m venv --upgrade-deps /opt/caikit/
 ENV VIRTUAL_ENV=/opt/caikit
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
+# Install build dependencies for gRPC compilation
+RUN microdnf update -y && \
+    microdnf install -y \
+        gcc gcc-c++ make cmake \
+        python3-devel \
+        openssl-devel \
+        zlib-devel && \
+    microdnf clean all
+
 COPY --from=builder /build/dist/caikit_nlp*.whl /tmp/
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install /tmp/caikit_nlp*.whl && \
