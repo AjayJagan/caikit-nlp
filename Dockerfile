@@ -31,9 +31,14 @@ ENV VIRTUAL_ENV=/opt/caikit
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 COPY --from=builder /build/dist/caikit_nlp*.whl /tmp/
+
+# Install build tools, install wheel, then clean up in one layer
 RUN --mount=type=cache,target=/root/.cache/pip \
+    microdnf install -y gcc python3-devel && \
     pip install /tmp/caikit_nlp*.whl && \
-    rm /tmp/caikit_nlp*.whl
+    rm /tmp/caikit_nlp*.whl && \
+    microdnf remove -y gcc python3-devel && \
+    microdnf clean all
 
 COPY LICENSE /opt/caikit/
 COPY README.md /opt/caikit/
