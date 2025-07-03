@@ -28,9 +28,6 @@ RUN python -m venv --upgrade-deps /opt/caikit/
 ENV VIRTUAL_ENV=/opt/caikit
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-# Install build tools for pip packages that require compilation
-RUN microdnf install -y gcc gcc-c++ python3-devel && microdnf clean all
-
 COPY --from=builder /build/dist/caikit_nlp*.whl /tmp/
 
 RUN --mount=type=cache,target=/root/.cache/pip \
