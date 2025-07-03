@@ -15,9 +15,12 @@ COPY pyproject.toml .
 COPY tox.ini .
 COPY caikit_nlp caikit_nlp
 # .git is required for setuptools-scm get the version
-RUN --mount=source=.git,target=.git,type=bind \
-    --mount=type=cache,target=/root/.cache/pip \
+COPY .git .git
+RUN --mount=type=cache,target=/root/.cache/pip \
      tox -e build
+
+# Clean up .git to reduce image size
+RUN rm -rf .git
 
 
 FROM base as deploy
