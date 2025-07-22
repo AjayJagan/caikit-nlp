@@ -20,9 +20,6 @@ RUN --mount=type=cache,target=/root/.cache/pip \
      tox -e build && \
      rm -rf .git
 
-# Clean up .git to reduce image size
-RUN rm -rf .git
-
 
 FROM base as deploy
 
